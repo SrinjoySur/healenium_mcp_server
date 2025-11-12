@@ -14,7 +14,6 @@ public class HealeniumMcpServerApplication {
     }
 
     @Bean
-    @SuppressWarnings("unused")
     public ToolCallbackProvider healeniumTools(HealeniumToolService healeniumToolService) {
         return MethodToolCallbackProvider.builder().toolObjects(healeniumToolService).build();
     }

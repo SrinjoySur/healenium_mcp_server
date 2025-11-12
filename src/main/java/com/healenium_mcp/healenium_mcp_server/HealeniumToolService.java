@@ -10,15 +10,18 @@ import org.springframework.stereotype.Service;
 public class HealeniumToolService {
     private SelfHealingDriver driver;
 
+    public HealeniumToolService(){}
     @Tool(description = "Starts A Browser Session")
-    @SuppressWarnings("unused")
     public void startBrowser() {
         WebDriver webDriver=new ChromeDriver();
        this.driver= SelfHealingDriver.create(webDriver);
     }
+    @Tool(description = "Navigate To A Url")
+    public void navigateTo(String url){
+        driver.get(url);
+    }
 
     @Tool(description = "Closes All Browser Sessions")
-    @SuppressWarnings("unused")
     public void closeBrowser() {
         driver.quit();
     }
