@@ -1,26 +1,105 @@
 package com.healenium_mcp.healenium_mcp_server;
 
+import com.epam.healenium.SelfHealingDriverWait;
+import org.openqa.selenium.NoSuchElementException;
 import com.epam.healenium.SelfHealingDriver;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
 
 @Service
 public class HealeniumToolService {
     private SelfHealingDriver driver;
+    private WebDriverWait wait;
 
+    public WebElement locateElement(String type, String value){
+        try{
+            switch (type.toLowerCase()){
+                case "id"->{
+                    return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(value)));
+                }
+                case "classname"->{
+                    return wait.until(ExpectedConditions.visibilityOfElementLocated(By.className(value)));
+                }
+                case "tagname"->{
+                    return wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName(value)));
+                }
+                case "name"->{
+                    return wait.until(ExpectedConditions.visibilityOfElementLocated(By.name(value)));
+                }
+                case "link text"->{
+                    return wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText(value)));
+                }
+                case "partial link text"->{
+                    return wait.until(ExpectedConditions.visibilityOfElementLocated(By.partialLinkText(value)));
+                }
+                case "css selector"->{
+                    return wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(value)));
+                }
+                case "xpath"->{
+                    return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(value)));
+                }
+                case null,default ->{
+                    throw  new NoSuchElementException("No such element Found");
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
     public HealeniumToolService(){}
     @Tool(description = "Starts A Browser Session")
-    public void startBrowser() {
-        WebDriver webDriver=new ChromeDriver();
-       this.driver= SelfHealingDriver.create(webDriver);
+    public void startBrowser(String browser) {
+        WebDriver delegate;
+        switch (browser.toLowerCase()) {
+            case "chrome"->{
+                delegate = new ChromeDriver();
+            }
+            case "edge"->{
+                delegate =new EdgeDriver();
+            }
+            case "firefox"->{
+                delegate =new FirefoxDriver();
+            }
+            default -> {
+                delegate=new ChromeDriver();
+            }
+        }
+       this.driver= SelfHealingDriver.create(delegate);
+        this.wait=new SelfHealingDriverWait(driver, Duration.ofSeconds(360));
     }
     @Tool(description = "Navigate To A Url")
     public void navigateTo(String url){
         driver.get(url);
     }
-
+    @Tool(description = "Find Element with Locator")
+    public String findElement(String type, String value){
+        try{
+            locateElement(type, value);
+            return "Element Found";
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @Tool(description = "Click a found WebElement")
+    public String clickElement(String type,String value){
+        try{
+            WebElement element=wait.until(ExpectedConditions.elementToBeClickable(locateElement(type, value)));
+            element.click();
+            return "Element Clicked";
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
     @Tool(description = "Closes All Browser Sessions")
     public void closeBrowser() {
         driver.quit();
