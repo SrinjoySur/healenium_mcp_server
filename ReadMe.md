@@ -17,7 +17,8 @@ This project integrates Healenium with MCP to provide AI agents with robust web 
 
 ### `startBrowser`
 - **Description**: Starts a new browser session
-- **Parameters**: None
+- **Parameters**: 
+  - `browser` (String): Browser type - "chrome", "edge", "firefox" (defaults to Chrome if invalid)
 - **Usage**: Initializes a new WebDriver browser instance with Healenium self-healing capabilities
 
 ### `navigateTo`
@@ -25,6 +26,56 @@ This project integrates Healenium with MCP to provide AI agents with robust web 
 - **Parameters**: 
   - `url` (String): The URL to navigate to
 - **Usage**: Opens the specified URL in the current browser session
+
+### `findElement`
+- **Description**: Find a single web element using various locator strategies
+- **Parameters**: 
+  - `type` (String): Locator type - "id", "classname", "tagname", "name", "link text", "partial link text", "css selector", "xpath"
+  - `value` (String): The locator value
+- **Usage**: Locates and verifies the presence of a web element, returns "Element Found" if successful
+
+### `findElements`
+- **Description**: Find multiple web elements using various locator strategies
+- **Parameters**: 
+  - `type` (String): Locator type - "id", "classname", "tagname", "name", "link text", "partial link text", "css selector", "xpath"
+  - `value` (String): The locator value
+- **Usage**: Locates multiple elements matching the criteria, returns "All Elements Found" if successful
+
+### `clickElement`
+- **Description**: Click on a single web element
+- **Parameters**: 
+  - `type` (String): Locator type - "id", "classname", "tagname", "name", "link text", "partial link text", "css selector", "xpath"
+  - `value` (String): The locator value
+- **Usage**: Waits for element to be clickable and performs click action, returns "Element Clicked" if successful
+
+### `clickElements`
+- **Description**: Click on multiple web elements
+- **Parameters**: 
+  - `type` (String): Locator type - "id", "classname", "tagname", "name", "link text", "partial link text", "css selector", "xpath"
+  - `value` (String): The locator value
+- **Usage**: Finds all matching elements and clicks each one, returns "All Elements Clicked" if successful
+
+### `hoverOverElement`
+- **Description**: Hover the mouse pointer over a single web element
+- **Parameters**: 
+  - `type` (String): Locator type - "id", "classname", "tagname", "name", "link text", "partial link text", "css selector", "xpath"
+  - `value` (String): The locator value
+- **Usage**: Moves the mouse cursor to the specified element, useful for triggering hover effects and dropdown menus, returns "Successfully Hovered" if successful
+
+### `hoverOverAll`
+- **Description**: Hover the mouse pointer over multiple web elements sequentially
+- **Parameters**: 
+  - `type` (String): Locator type - "id", "classname", "tagname", "name", "link text", "partial link text", "css selector", "xpath"
+  - `value` (String): The locator value
+- **Usage**: Sequentially moves the mouse cursor over all matching elements, returns "Successfully Hovered Over All" if successful
+
+### `sendKeysToElement`
+- **Description**: Send keyboard input (text) to a web element
+- **Parameters**: 
+  - `type` (String): Locator type - "id", "classname", "tagname", "name", "link text", "partial link text", "css selector", "xpath"
+  - `value` (String): The locator value
+  - `keys` (String): The text/keys to send to the element
+- **Usage**: Locates an input element and sends the specified text to it, commonly used for filling forms and text fields, returns "Keys Sent Successfully" if successful
 
 ### `closeBrowser`
 - **Description**: Closes all browser sessions
@@ -41,12 +92,36 @@ This project integrates Healenium with MCP to provide AI agents with robust web 
 
 ### Healenium Web Server Setup
 
+<!--
+/**
+ * Healenium Web Server Configuration
+ * 
+ * This section describes the setup process for the Healenium web server component,
+ * which is a critical dependency for the self-healing functionality of this MCP server.
+ * 
+ * The Healenium web server acts as a backend service that:
+ * - Stores healing data and learning algorithms
+ * - Provides REST APIs for healing operations
+ * - Manages element locator mappings and suggestions
+ * - Offers a web dashboard for monitoring healing activities
+ * 
+ * @requires Port 8000 must be available on localhost
+ * @requires Docker (if using containerized setup)
+ * @requires Shell script execution permissions
+ * 
+ * @critical Without this server running, self-healing capabilities will be disabled
+ *          and the MCP server may throw connection errors during browser automation
+ */
+-->
+
 **Important**: This MCP server requires the Healenium web application to be running locally on port 8000 for proper self-healing functionality.
 
 To set up Healenium web server:
 
 1. **Using Shell Script (Required)**:
 ```bash
+# Execute the Healenium startup script
+# This script handles Docker container setup and service initialization
 sh start_healenium.sh
 ```
 
@@ -54,6 +129,7 @@ sh start_healenium.sh
    - Open `http://localhost:8000` in your browser
    - You should see the Healenium dashboard
    - The script should start the Healenium web server on port 8000
+   - Check the dashboard shows "Service Status: Running"
 
 **Note**: Make sure the `start_healenium.sh` script is executable and available in your system path or current directory.
 
@@ -117,16 +193,45 @@ This MCP server can be integrated with AI agents that support the Model Context 
 
 ## Architecture
 
+<!--
+/**
+ * System Architecture Overview
+ * 
+ * This diagram illustrates the interaction flow between different components:
+ * 
+ * @component AI Agent - External agent that consumes MCP tools via JSON-RPC
+ * @component MCP Server - Spring Boot application exposing web automation tools
+ * @component HealeniumToolService - Service layer containing @Tool annotated methods
+ * @component SelfHealingDriver - Wrapper around Selenium WebDriver with healing capabilities
+ * @component Healenium Web Server - Backend service for healing logic and data storage
+ * @component Web Browser - Target browser instances (Chrome, Firefox, Edge)
+ * 
+ * @flow 1. AI Agent calls MCP tool methods via JSON-RPC protocol
+ * @flow 2. MCP Server routes calls to HealeniumToolService methods
+ * @flow 3. Service methods use SelfHealingDriver for browser automation
+ * @flow 4. When locators fail, SelfHealingDriver queries Healenium Web Server
+ * @flow 5. Healenium Web Server provides alternative locators using ML algorithms
+ * @flow 6. Browser actions are executed with healed locators
+ */
+-->
+
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   AI Agent      │◄──►│  MCP Server      │◄──►│  Healenium      │
-│                 │    │  (Spring Boot)   │    │  + Selenium     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │   Web Browser   │
-                       └─────────────────┘
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────────┐
+│   AI Agent      │◄──►│  MCP Server      │◄──►│ HealeniumToolService│
+│   (External)    │    │  (Spring Boot)   │    │   (@Tool methods)   │
+└─────────────────┘    └──────────────────┘    └─────────────────────┘
+                                                         │
+                                                         ▼
+                       ┌─────────────────────────────────────────────┐
+                       │           SelfHealingDriver                 │
+                       │        (Selenium + Healing Logic)          │
+                       └─────────────────────────────────────────────┘
+                                         │                │
+                                         ▼                ▼
+                       ┌─────────────────────┐  ┌─────────────────┐
+                       │ Healenium Web Server│  │   Web Browser   │
+                       │   (Port 8000)       │  │ Chrome/Edge/FF  │
+                       └─────────────────────┘  └─────────────────┘
 ```
 
 ## Development
@@ -158,9 +263,16 @@ To add new web automation tools:
 
 Example:
 ```java
-@Tool(description = "Click on an element by CSS selector")
-public void clickElement(String cssSelector) {
-    driver.findElement(By.cssSelector(cssSelector)).click();
+@Tool(description = "Send text to a web element")
+public String sendText(String type, String value, String text) {
+    try {
+        WebElement element = locateElement(type, value);
+        element.clear();
+        element.sendKeys(text);
+        return "Text sent to element";
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to send text: " + e.getMessage());
+    }
 }
 ```
 
@@ -178,14 +290,33 @@ mvn test
 1. **WebDriver not found**
    - Ensure a compatible web browser is installed
    - WebDriver is automatically managed by Selenium
+   - For Chrome: Ensure Chrome browser is installed and up to date
 
 2. **Port already in use**
-   - Check if another instance is running
+   - Check if another instance is running on port 8080 (MCP Server)
+   - Check if Healenium web server is running on port 8000
    - Configure a different port in `application.properties`
 
 3. **Healenium healing not working**
+   - Verify Healenium web server is running: `http://localhost:8000`
    - Check `healenium.properties` configuration
    - Ensure proper element locators are used
+   - Review healing logs in the Healenium dashboard
+
+4. **NoSuchElementException errors**
+   - Verify element locators are correct (id, classname, xpath, etc.)
+   - Check if elements are loaded before interaction
+   - Ensure WebDriverWait timeout (20 seconds) is sufficient
+
+5. **Browser startup failures**
+   - Verify browser parameter is correct ("chrome", "edge", "firefox")
+   - Ensure browser drivers are compatible with installed browser versions
+   - Check system PATH for browser executables
+
+6. **MCP connection issues**
+   - Verify Spring Boot application is running on expected port
+   - Check application logs for startup errors
+   - Ensure Java 21 is installed and configured correctly
 
 ## Contributing
 

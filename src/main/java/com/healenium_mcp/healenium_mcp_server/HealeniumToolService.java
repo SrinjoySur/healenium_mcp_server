@@ -1,14 +1,14 @@
 package com.healenium_mcp.healenium_mcp_server;
 
+
 import com.epam.healenium.SelfHealingDriverWait;
-import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.*;
 import com.epam.healenium.SelfHealingDriver;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.interactions.Action;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.ai.tool.annotation.Tool;
@@ -21,7 +21,7 @@ import java.util.List;
 public class HealeniumToolService {
     private SelfHealingDriver driver;
     private WebDriverWait wait;
-
+    private Action action;
     public WebElement locateElement(String type, String value){
         try{
             switch (type.toLowerCase()){
@@ -155,6 +155,44 @@ public class HealeniumToolService {
             return "All Elements Clicked";
         } catch (RuntimeException e) {
             throw new NoSuchElementException("Exception thrown for element not found:"+e);
+        }
+    }
+    @Tool(description = "Hover Over A Element")
+    public String hoverOverElement(String type,String value){
+        try{
+            WebElement element=locateElement(type, value);
+            action= new Actions(driver).moveToElement(element).build();
+            action.perform();
+            return "Successfully Hovered";
+        } catch (NoSuchElementException e){
+            throw new NoSuchElementException("No Such Element Found in the Website:"+e);
+        }
+    }
+    @Tool(description = "Hover Over Multiple Elements")
+    public String hoverOverAll(String type,String value){
+        try{
+            List<WebElement> elements=locateElements(type, value);
+            Actions actions=new Actions(driver);
+            for(WebElement e:elements){
+                actions.moveToElement(e);
+            }
+            action=actions.build();
+            action.perform();
+            return "Successfully Hovered Over All";
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No Such element Present:"+e);
+        }
+    }
+    @Tool(description = "Send Keys to An Element")
+    public String sendKeysToElement(String type,String value,String keys){
+        try{
+            WebElement element=locateElement(type, value);
+            element.sendKeys(keys);
+            return "Keys Sent Successfully";
+        } catch (NoSuchElementException e){
+            throw new NoSuchElementException("No Such Text Box:"+e);
+        } catch (ElementNotInteractableException e){
+            throw new ElementNotInteractableException("This element is not enabled:"+e);
         }
     }
     @Tool(description = "Closes All Browser Sessions")
