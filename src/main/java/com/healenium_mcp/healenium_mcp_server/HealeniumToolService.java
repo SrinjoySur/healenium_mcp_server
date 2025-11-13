@@ -15,6 +15,7 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.List;
 
 @Service
 public class HealeniumToolService {
@@ -52,8 +53,43 @@ public class HealeniumToolService {
                     throw  new NoSuchElementException("No such element Found");
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (RuntimeException e) {
+            throw new NoSuchElementException("Exception thrown for element not found:"+e);
+        }
+    }
+    public List<WebElement> locateElements(String type, String value){
+        try{
+            switch (type.toLowerCase()){
+                case "id"->{
+                    return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.id(value)));
+                }
+                case "classname"->{
+                    return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.className(value)));
+                }
+                case "tagname"->{
+                    return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.tagName(value)));
+                }
+                case "name"->{
+                    return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.name(value)));
+                }
+                case "link text"->{
+                    return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.linkText(value)));
+                }
+                case "partial link text"->{
+                    return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.partialLinkText(value)));
+                }
+                case "css selector"->{
+                    return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector(value)));
+                }
+                case "xpath"->{
+                    return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.xpath(value)));
+                }
+                case null,default ->{
+                    throw  new NoSuchElementException("No such element Found");
+                }
+            }
+        } catch (RuntimeException e) {
+            throw new NoSuchElementException("Exception thrown for element not found:"+e);
         }
     }
     public HealeniumToolService(){}
@@ -75,7 +111,7 @@ public class HealeniumToolService {
             }
         }
        this.driver= SelfHealingDriver.create(delegate);
-        this.wait=new SelfHealingDriverWait(driver, Duration.ofSeconds(360));
+        this.wait=new SelfHealingDriverWait(driver, Duration.ofSeconds(20));
     }
     @Tool(description = "Navigate To A Url")
     public void navigateTo(String url){
@@ -86,8 +122,8 @@ public class HealeniumToolService {
         try{
             locateElement(type, value);
             return "Element Found";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (RuntimeException e) {
+            throw new NoSuchElementException("Exception thrown for element not found:"+e);
         }
     }
     @Tool(description = "Click a found WebElement")
@@ -98,6 +134,27 @@ public class HealeniumToolService {
             return "Element Clicked";
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+    @Tool(description = "Finding Multiple Web Elements")
+    public String findElements(String type,String value){
+        try {
+            locateElements(type,value);
+            return "All Elements Found";
+        } catch (RuntimeException e) {
+            throw new NoSuchElementException("Exception thrown for element not found:"+e);
+        }
+    }
+    @Tool(description = "Click all elements")
+    public String clickElements(String type,String value){
+        try{
+            List<WebElement> elements= locateElements(type, value);
+            for (WebElement e:elements){
+                e.click();
+            }
+            return "All Elements Clicked";
+        } catch (RuntimeException e) {
+            throw new NoSuchElementException("Exception thrown for element not found:"+e);
         }
     }
     @Tool(description = "Closes All Browser Sessions")
