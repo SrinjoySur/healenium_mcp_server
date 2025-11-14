@@ -195,6 +195,30 @@ public class HealeniumToolService {
             throw new ElementNotInteractableException("This element is not enabled:"+e);
         }
     }
+    @Tool(description = "Get Current Url")
+    public String getUrl(){
+        return driver.getCurrentUrl();
+    }
+    @Tool(description = "Get Page Title")
+    public String getTitle(){
+        return driver.getTitle();
+    }
+    @Tool(description = "Maximize Window")
+    public String maximizeWindow(){
+        driver.manage().window().maximize();
+        return "Window Maximized";
+    }
+    @Tool(description = "Minimize Window")
+    public String minimizeWindow(){
+        driver.manage().window().minimize();
+        return "Window Minimized";
+    }
+    @Tool(description = "Resize Window")
+    public String resizeWindow(int width,int height){
+        Dimension dimension=new Dimension(width, height);
+        driver.manage().window().setSize(dimension);
+        return "Window Resized";
+    }
     @Tool(description = "Closes All Browser Sessions")
     public void closeBrowser() {
         driver.quit();
