@@ -22,6 +22,43 @@ public class HealeniumToolService {
     private SelfHealingDriver driver;
     private WebDriverWait wait;
     private Action action;
+    public Keys getKey(String key){
+        switch (key.toLowerCase()){
+            case "tab"->{
+                return Keys.TAB;
+            }
+            case "arrow_up"->{
+                return Keys.ARROW_UP;
+            }
+            case "arrow_down"->{
+                return Keys.ARROW_DOWN;
+            }
+            case "arrow_left"->{
+                return Keys.ARROW_LEFT;
+            }
+            case "arrow_right"->{
+                return Keys.ARROW_RIGHT;
+            }
+            case "backspace"->{
+                return Keys.BACK_SPACE;
+            }
+            case "enter"->{
+                return Keys.ENTER;
+            }
+            case "shift"->{
+                return Keys.SHIFT;
+            }
+            case "left_shift"->{
+                return Keys.LEFT_SHIFT;
+            }
+            case "esc"->{
+                return Keys.ESCAPE;
+            }
+            case null, default -> {
+                throw new RuntimeException("No Such Key");
+            }
+        }
+    }
     public WebElement locateElement(String type, String value){
         try{
             switch (type.toLowerCase()){
@@ -219,6 +256,40 @@ public class HealeniumToolService {
         driver.manage().window().setSize(dimension);
         return "Window Resized";
     }
+    @Tool(description = "Drag And Drop Element")
+    public String dragAndDrop(String type,String value1, String value2){
+        try {
+            WebElement element1=locateElement(type, value1);
+            WebElement element2=locateElement(type, value2);
+            action=new Actions(driver).dragAndDrop(element1,element2).build();
+            action.perform();
+            return "Drag And Drop Action Completed Successfully";
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException("No Such Element Found"+e);
+        }
+    }
+    @Tool(description = "Scroll Down To Element")
+    public String scrollDownTo(String type,String value){
+        try{
+            WebElement element=locateElement(type,value);
+            action=new Actions(driver).scrollToElement(element).build();
+            action.perform();
+            return "Scrolled Down To Element";
+        }catch (NoSuchElementException e){
+            throw new NoSuchElementException("No Such Element Found"+e);
+        }
+    }
+    @Tool(description = "Clicks A Key On An Element")
+    public String keys(String type,String value,String key){
+        try {
+            WebElement element = locateElement(type, value);
+            new Actions(driver).keyDown(element,getKey(key));
+            return "Key Clicked on Element";
+        } catch (NoSuchElementException e){
+            throw new NoSuchElementException("No Such Element Found:"+e);
+        }
+    }
+
     @Tool(description = "Closes All Browser Sessions")
     public void closeBrowser() {
         driver.quit();
